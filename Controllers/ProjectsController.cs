@@ -9,10 +9,10 @@ namespace PMSBackend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ValuesController : ControllerBase
+    public class ProjectsController : ControllerBase
     {
         ApplicationContext _context;
-        public ValuesController(ApplicationContext context)
+        public ProjectsController(ApplicationContext context)
         {
             _context = context;
         }
