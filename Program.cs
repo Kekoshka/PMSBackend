@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using PMSBackend.Common;
 using PMSBackend.Context;
@@ -11,6 +12,18 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<ApplicationContext>(config => config.UseSqlServer(Config.ConnectionString));
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidIssuer = AuthOptions.Issuer,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
+        ValidateIssuerSigningKey = true
+    };
+});
 
 var app = builder.Build();
 

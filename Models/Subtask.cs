@@ -10,6 +10,6 @@
         public int ProjectStatusId { get; set; }
         public User? User { get; set; }
         public Task Task { get; set; }
-        public ProjectStatus ProjectStatus { get; set; }
+        public Status Status{ get; set; }
     }
 }

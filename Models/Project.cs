@@ -8,6 +8,6 @@
         public bool Private { get; set; }
         public ICollection<Task>? Tasks { get; set; }
         public ICollection<Participation>? Participations { get; set; }
-        public ICollection<ProjectStatus> ProjectStatuses { get; set; }
+        public ICollection<Status> Statuses{ get; set; }
     }
 }
