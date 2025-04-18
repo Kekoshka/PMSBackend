@@ -2,6 +2,6 @@
 {
     public class Config
     {
-        public readonly static string ConnectionString = "Server=;Database=;Trusted_Connection=true;Encrypt=false";
+        public readonly static string ConnectionString = "Server=ASUS_ROG_STRIX;Database=PMSBackend;Trusted_Connection=true;Encrypt=false";
     }
 }
