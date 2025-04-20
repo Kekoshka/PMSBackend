@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PMSBackend.Context;
 using PMSBackend.Models;
@@ -16,6 +17,7 @@ namespace PMSBackend.Controllers
         {
             _context = context;
         }
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> Get()
         {
@@ -45,6 +47,7 @@ namespace PMSBackend.Controllers
             await _context.SaveChangesAsync();
             return Ok(project);
         }
+        [Authorize]
         [HttpDelete]
         public async Task<IActionResult> Delete(int projectId)
         {
