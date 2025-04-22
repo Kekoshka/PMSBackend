@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PMSBackend.Common;
 using PMSBackend.Models;
 
 namespace PMSBackend.Context
@@ -13,9 +14,15 @@ namespace PMSBackend.Context
         public DbSet<Models.Task> Tasks { get; set; }
         public DbSet<User> Users { get; set; }
 
+        public ApplicationContext() { }
         public ApplicationContext(DbContextOptions<ApplicationContext> options) : base (options)
         {
             Database.EnsureCreated();
         }
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseSqlServer(Config.ConnectionString);
+        }
+
     }
 }

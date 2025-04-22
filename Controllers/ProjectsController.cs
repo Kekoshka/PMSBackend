@@ -1,23 +1,26 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 using PMSBackend.Context;
 using PMSBackend.Models;
+using System.Security.Claims;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace PMSBackend.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ProjectsController : ControllerBase
     {
         ApplicationContext _context;
+
         public ProjectsController(ApplicationContext context)
         {
             _context = context;
         }
-        [Authorize]
         [HttpGet]
         public async Task<IActionResult> Get()
         {
@@ -28,10 +31,24 @@ namespace PMSBackend.Controllers
         public async Task<IActionResult> Post(Project project)
         {
             if (project is null)
-                return BadRequest();
+                return BadRequest("badRequest");
             await _context.Projects.AddAsync(project);
             await _context.SaveChangesAsync();
-            return NoContent();
+            await _context.Participations.AddAsync(new Participation
+            {
+                RoleId = 1,
+                UserId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value),
+                ProjectId = project.Id
+            });
+            await _context.Statuses.AddRangeAsync(new List<Status>()
+            {
+                new Status { Name = "Новые", ProjectId = project.Id },
+                new Status { Name = "В работе", ProjectId = project.Id },
+                new Status{Name= "Можно проверять", ProjectId = project.Id},
+                new Status { Name = "Готово", ProjectId = project.Id }
+            });
+            await _context.SaveChangesAsync();
+            return Ok(project.Id);
         }
         [HttpPut]
         public async Task<IActionResult> Update(Project projectUpdate)
@@ -47,15 +64,13 @@ namespace PMSBackend.Controllers
             await _context.SaveChangesAsync();
             return Ok(project);
         }
-        [Authorize]
         [HttpDelete]
         public async Task<IActionResult> Delete(int projectId)
         {
-            var project = _context.Projects.FirstOrDefault(p => p.Id == projectId);
+            var project = _context.Projects.FirstOrDefault(p => p.Id == projectId && p.Participations.FirstOrDefault(par => par.UserId == Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier).Value) && par.RoleId == 1) != default);
             if (project is null)
-                return NotFound($"Project with id={projectId} not found");
+                return NotFound($"Project with id={projectId} not found or user don't have access");
             _context.Projects.Remove(project);
-            await _context.SaveChangesAsync();
             return NoContent();
         }
     }

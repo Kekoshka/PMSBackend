@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using PMSBackend.Common;
 using PMSBackend.Context;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace PMSBackend.Controllers
 {
@@ -18,17 +19,23 @@ namespace PMSBackend.Controllers
         {
             _context = context;
         }
-        [HttpGet("{login}/{password}")]
-        public async Task<IActionResult> login(string login, string password)
+        [HttpGet]
+        public async Task<IActionResult> Login(string login, string password)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Mail == login && u.Password == password);
+            if (user is null)
+                return Unauthorized("Login or password is incorrect");
+            var claims = new List<Claim>()
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+            };
             var jwt = new JwtSecurityToken(
                 issuer: AuthOptions.Issuer,
                 audience: user.Id.ToString(),
-                claims: null,
-                expires: DateTime.UtcNow.AddMinutes(2),
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(10),
                 signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
-            return user is null ? Unauthorized("Login or password is incorrect") : Ok(new JwtSecurityTokenHandler().WriteToken(jwt));
+            return Ok(new JwtSecurityTokenHandler().WriteToken(jwt));
 
         }
     }

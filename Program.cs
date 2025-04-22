@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using PMSBackend.Common;
 using PMSBackend.Context;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -19,11 +20,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         ValidateIssuer = true,
         ValidIssuer = AuthOptions.Issuer,
         ValidateAudience = true,
+        ValidAudiences = AuthOptions.GetAudiences(),
         ValidateLifetime = true,
         IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
         ValidateIssuerSigningKey = true
     };
 });
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
