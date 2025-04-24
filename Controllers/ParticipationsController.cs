@@ -15,7 +15,7 @@ namespace PMSBackend.Controllers
     public class ParticipationsController : ControllerBase
     {
         ApplicationContext _context;
-        ParticipationsController(ApplicationContext context)
+        public ParticipationsController(ApplicationContext context)
         {
             _context = context;
         }
@@ -24,8 +24,7 @@ namespace PMSBackend.Controllers
         {
             int userId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier).Value);
             var user = await _context.Participations.FirstOrDefaultAsync(p => p.UserId == userId && p.ProjectId == projectId);
-            if (user is null)
-                return Unauthorized("User isn't a member of the project");
+            if (user is null) return Unauthorized("User isn't a member of the project");
             var participations = await _context.Participations.Where(p => p.ProjectId == projectId).ToListAsync();
             return Ok(participations);
         }
@@ -34,20 +33,19 @@ namespace PMSBackend.Controllers
         {
             int UserId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier));
             var user = await _context.Participations.FirstOrDefaultAsync(p => p.UserId == UserId && p.RoleId == 1 && p.ProjectId == participation.ProjectId);
-            if (user is null)
-                return Unauthorized("User isn't a member of the project or doesn't have rights");
+            if (user is null) return Unauthorized("User isn't a member of the project or doesn't have rights");
             _context.Participations.Add(participation);
+            await _context.SaveChangesAsync();
+            return Ok();
         }
         [HttpPut]
         public async Task<IActionResult> Update(Participation participationUpdate)
         {
             int UserId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier));
             var user = await _context.Participations.FirstOrDefaultAsync(p => p.UserId == UserId && p.RoleId == 1 && p.ProjectId == participationUpdate.ProjectId);
-            if (user is null)
-                return Unauthorized("User isn't a member of the project or doesn't have rights");
+            if (user is null) return Unauthorized("User isn't a member of the project or doesn't have rights");
             var participation = await _context.Participations.FirstOrDefaultAsync(p => p.Id == participationUpdate.Id);
-            if (participation is null)
-                return NotFound();
+            if (participation is null) return NotFound();
             participation.RoleId = participationUpdate.RoleId;
             await _context.SaveChangesAsync();
             return Ok(participation);
@@ -57,11 +55,9 @@ namespace PMSBackend.Controllers
         {
             int UserId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier));
             var user = await _context.Participations.FirstOrDefaultAsync(p => p.UserId == UserId && p.RoleId == 1 && p.ProjectId == participationDelete.ProjectId);
-            if (user is null)
-                return Unauthorized("User isn't a member of the project or doesn't have rights");
+            if (user is null) return Unauthorized("User isn't a member of the project or doesn't have rights");
             var participation = await _context.Participations.FirstOrDefaultAsync(p => p.Id == participationDelete.Id);
-            if (participation is null)
-                return NotFound();
+            if (participation is null) return NotFound();
             _context.Participations.Remove(participation);
             int count = await _context.SaveChangesAsync();
             return Ok($"Deleted users: {count}");
